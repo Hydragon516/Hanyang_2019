@@ -1,0 +1,17 @@
+site_name: AurixRacer
+
+pages:
+- Home: 'index.md'
+- AurixRacer Guide:
+    - Getting Started: GettingStarted.md
+    - User Guide: UserGuide.md
+    - Connection Guide: ConnectionGuide.md
+    - Simulink as a Programming Language: SimulinkAsAProgrammingLanguage.md
+
+
+theme: readthedocs
+
+extra_javascript:
+    - http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
+
+use_directory_urls: false
