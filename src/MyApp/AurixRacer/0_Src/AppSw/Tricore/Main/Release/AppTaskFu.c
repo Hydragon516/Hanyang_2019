@@ -73,8 +73,8 @@ void appTaskfu_10ms(void)
 
 	//printf("lane : %d\n", get_lane());
 
-	//printf("AdcResult1: \t");
-	//printf("%f \n", IR_AdcResult[1]);
+	printf("AdcResult0: \t");
+	printf("%f \n", IR_AdcResult[0] * 5);
 
 }
 
@@ -114,7 +114,7 @@ void appTaskfu_1000ms(void)
 {
 	if(task_cnt_1000m % 2 == 0){
 		//IR_setSrvAngle(0.5);
-		IR_setMotor0Vol(-0.2);
+		IR_setMotor0Vol(-0.17);
 	}
 	else{
 		//IR_setSrvAngle(-0.5);

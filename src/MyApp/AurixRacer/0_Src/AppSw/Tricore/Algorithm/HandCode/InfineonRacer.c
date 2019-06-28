@@ -10,7 +10,7 @@
 #define WIDTH (8)
 #define STANDARD (64)
 #define OFFSET_MAX (20)
-#define SUM_RATIO (0.65)
+#define VALID_RATIO (0.65)
 
 /******************************************************************************/
 /*--------------------------------Enumerations--------------------------------*/
@@ -26,8 +26,7 @@
 
 InfineonRacer_t IR_Ctrl  /**< \brief  global data */
 		={64, 64, FALSE  };
-
-boolean isLaneValid = TRUE;
+boolean isLaneValid = FALSE;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -35,9 +34,11 @@ boolean isLaneValid = TRUE;
 /******************************************************************************/
 /*------------------------Private Variables/Constants-------------------------*/
 /******************************************************************************/
-static int lane;
-static float offset;
-static float angle;
+static int lane;			// 차선 (0 ~ 127)
+static float offset;		// 차가 기준점에서 떨어진 정도. 양수(왼쪽) 음수(오른쪽)
+static float angle;			// 서보모터 각도 (-0.5 ~ 0.5)
+static boolean StartLaneChange = FALSE;
+static int count = 0;
 
 /******************************************************************************/
 /*-------------------------Function Implementations---------------------------*/
@@ -73,6 +74,7 @@ void InfineonRacer_detectLane(void){
 		}
 	}
 	// isLaneValid 계산
+	// lane 구간 평균이 lane 제외구간 평균의 RATIO배 이상이어야 TRUE
 	int average = 0;
 	for(i = 0; i < lane - WIDTH; i++){
 		average += IR_LineScan.adcResult[0][i];
@@ -81,7 +83,7 @@ void InfineonRacer_detectLane(void){
 		average += IR_LineScan.adcResult[0][i];
 	}
 	average = average * 8 / 120;
-	if(min_sum < (average * SUM_RATIO)){
+	if(min_sum < (average * VALID_RATIO)){
 		isLaneValid = TRUE;
 	}
 	else{
@@ -102,10 +104,37 @@ void InfineonRacer_detectLane(void){
 
 void InfineonRacer_control(void){
 	// angle이 offset에 linear 비례
-	if(isLaneValid){
+	/*if(isLaneValid){
 		angle = 0.5 * (offset / OFFSET_MAX);
 		IR_setSrvAngle(angle);
+	}*/
+	if(!StartLaneChange){
+		if(isLaneValid){
+			angle = 0.5 * (offset / OFFSET_MAX);
+			IR_setSrvAngle(angle);
+		}
+		if((IR_AdcResult[0] * 5) > 1.5) {
+			StartLaneChange = TRUE;
+			IR_setSrvAngle(-0.5);
+		}
 	}
+	else if(StartLaneChange) {
+		if((IR_AdcResult[0] * 5) < 1.5) {
+			/*if(isLaneValid) {
+				IR_setSrvAngle(0.5);
+			}*/
+			count++;
+			if(count > 30) {
+				IR_setSrvAngle(0.5);
+				if(count > 70){
+					IR_setSrvAngle(0.0);
+					StartLaneChange = FALSE;
+					count = 0;
+				}
+			}
+		}
+	}
+
 }
 
 int get_lane(void){

@@ -89,9 +89,9 @@ int core0_main(void)
 
     /* Demo init */
     BasicStm_init();
-    printf("main : IR_setMotor0En(1)\n");
+    //printf("main : IR_setMotor0En(1)\n");
     IR_setMotor0En(1);
-    //IR_setMotor0Vol(-0.3);
+
     //IR_setLed0(0);
 
     /* background endless loop */
