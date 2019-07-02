@@ -184,6 +184,7 @@ void InfineonRacer_control(void){
 			}
 			// 새로운 차선을 감지(반대 angle을 주고) 일정시간이 지나면 원래 모드로 돌아간다
 			if(NewLane && cnt > 20) {
+				IR_setSrvAngle(0);
 				StartLaneChange = FALSE;
 				NewLane = FALSE;
 				ObstacleDetected = FALSE;
