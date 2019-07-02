@@ -42,6 +42,7 @@ IFX_EXTERN boolean isLaneValid;
 IFX_EXTERN void InfineonRacer_init(void);
 IFX_EXTERN void InfineonRacer_detectLane(void);
 IFX_EXTERN void InfineonRacer_control(void);
-int get_lane(void);
+IFX_EXTERN int get_lane(void);
+IFX_EXTERN void InfineonRacer_DotFullLane(sint32);
 
 #endif

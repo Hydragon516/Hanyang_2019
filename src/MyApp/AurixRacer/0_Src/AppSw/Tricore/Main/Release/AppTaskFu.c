@@ -54,10 +54,11 @@ void appTaskfu_10ms(void)
 	if(task_cnt_10m%2 == 0){
 		BasicLineScan_run();
 		InfineonRacer_detectLane();
+		InfineonRacer_DotFullLane((task_cnt_10m / 2) % 50);
 		BasicPort_run();
 		BasicGtmTom_run();
 		BasicVadcBgScan_run();
-		printf("lane : %d\n", get_lane());
+		printf("task_cnt_10m : %d\n", task_cnt_10m);
 
 		if(IR_Ctrl.basicTest == FALSE){
 			#if CODE == CODE_HAND
@@ -73,8 +74,8 @@ void appTaskfu_10ms(void)
 
 	//printf("lane : %d\n", get_lane());
 
-	printf("AdcResult0: \t");
-	printf("%f \n", IR_AdcResult[0] * 5);
+	//printf("AdcResult0: \t");
+	//printf("%f \n", IR_AdcResult[0] * 5);
 
 }
 
@@ -93,39 +94,16 @@ void appTaskfu_100ms(void)
 
 #endif
 
-	/*
-	printf("lineScan : ");
-	printf("%d ", IR_LineScan.adcResult[0][0]);
-	printf("%d ", IR_LineScan.adcResult[0][1]);
-	printf("%d / ", IR_LineScan.adcResult[0][2]);
-	printf("%d ", IR_LineScan.adcResult[0][63]);
-	printf("%d ", IR_LineScan.adcResult[0][64]);
-	printf("%d / ", IR_LineScan.adcResult[0][65]);
-	printf("%d ", IR_LineScan.adcResult[0][125]);
-	printf("%d ", IR_LineScan.adcResult[0][126]);
-	printf("%d ", IR_LineScan.adcResult[0][127]);
-
-	printf("\n");
-	*/
-
 }
 
 void appTaskfu_1000ms(void)
 {
-	if(task_cnt_1000m % 2 == 0){
-		//IR_setSrvAngle(0.5);
-		IR_setMotor0Vol(-0.17);
-	}
-	else{
-		//IR_setSrvAngle(-0.5);
-		//IR_setMotor0Vol(0.3);
-	}
 	task_cnt_1000m++;
 	if(task_cnt_1000m == 1000){
 		task_cnt_1000m = 0;
 	}
 
-	printf("appTaskfu_1000ms : %d\n", task_cnt_1000m);
+	//printf("appTaskfu_1000ms : %d\n", task_cnt_1000m);
 
 }
 
