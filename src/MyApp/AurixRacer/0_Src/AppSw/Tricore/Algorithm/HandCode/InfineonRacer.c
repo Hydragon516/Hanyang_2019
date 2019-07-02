@@ -47,6 +47,10 @@ static boolean isFullLane = TRUE;
 static boolean LaneDetected[50] = { 0, };
 static int LaneDetectedSum = 0;
 
+static float32 AdcResults[10] = { 0, };
+static boolean ObstacleDetected = FALSE;
+static float32 AdcResultSum = 0;
+
 /******************************************************************************/
 /*-------------------------Function Implementations---------------------------*/
 /******************************************************************************/
@@ -91,15 +95,15 @@ void InfineonRacer_detectLane(void){
 		average += IR_LineScan.adcResult[0][i];
 	}
 	average = average * WIDTH / (128 - WIDTH);
-	printf("min_sum : %d\n", min_sum);
-	printf("average : %d\n", average);
+	//printf("min_sum : %d\n", min_sum);
+	//printf("average : %d\n", average);
 	if(min_sum < (average * VALID_RATIO)){
 		isLaneValid = TRUE;
-		printf("Lane : Valid\n");
+		//printf("Lane : Valid\n");
 	}
 	else{
 		isLaneValid = FALSE;
-		printf("Lane : inValid\n");
+		//printf("Lane : inValid\n");
 	}
 
 
@@ -129,7 +133,7 @@ void InfineonRacer_control(void){
 		}
 		// 주행 중 장애물을 만나면
 		// 초기 세팅을 하고 StartLaneChange 모드로 진입한다
-		if((IR_AdcResult[0] * 5) > 1.5) {
+		if(ObstacleDetected) {
 			StartLaneChange = TRUE;
 			invalid_cnt = 0;
 			cnt = 0;
@@ -182,6 +186,7 @@ void InfineonRacer_control(void){
 			if(NewLane && cnt > 20) {
 				StartLaneChange = FALSE;
 				NewLane = FALSE;
+				ObstacleDetected = FALSE;
 			}
 		}
 	}
@@ -209,4 +214,17 @@ void InfineonRacer_DotFullLane(sint32 task_cnt) {
 			isFullLane = FALSE;
 		}
 	}
+}
+
+void InfineonRacer_detectObstacle(sint32 task_cnt) {
+	float32 AdcResult = IR_AdcResult[0];
+	AdcResultSum -= AdcResults[task_cnt];
+	AdcResultSum += AdcResult;
+	AdcResults[task_cnt] = IR_AdcResult[0];
+	if(AdcResultSum > 2.5) {
+		ObstacleDetected = TRUE;
+	}
+//	if(task_cnt == 0) {
+//		printf("AdcResultSum : %f\n", AdcResultSum);
+//	}
 }

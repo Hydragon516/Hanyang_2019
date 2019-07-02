@@ -40,7 +40,7 @@ void appTaskfu_1ms(void)
 	if(task_cnt_1m == 1000){
 		task_cnt_1m = 0;
 	}
-
+	InfineonRacer_detectObstacle(task_cnt_1m % 10);
 }
 
 
@@ -58,7 +58,6 @@ void appTaskfu_10ms(void)
 		BasicPort_run();
 		BasicGtmTom_run();
 		BasicVadcBgScan_run();
-		printf("task_cnt_10m : %d\n", task_cnt_10m);
 
 		if(IR_Ctrl.basicTest == FALSE){
 			#if CODE == CODE_HAND
@@ -71,11 +70,6 @@ void appTaskfu_10ms(void)
 		}
 		AsclinShellInterface_runLineScan();
 	}
-
-	//printf("lane : %d\n", get_lane());
-
-	//printf("AdcResult0: \t");
-	//printf("%f \n", IR_AdcResult[0] * 5);
 
 }
 
@@ -102,8 +96,6 @@ void appTaskfu_1000ms(void)
 	if(task_cnt_1000m == 1000){
 		task_cnt_1000m = 0;
 	}
-
-	//printf("appTaskfu_1000ms : %d\n", task_cnt_1000m);
 
 }
 

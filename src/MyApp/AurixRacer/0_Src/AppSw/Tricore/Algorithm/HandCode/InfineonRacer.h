@@ -44,5 +44,6 @@ IFX_EXTERN void InfineonRacer_detectLane(void);
 IFX_EXTERN void InfineonRacer_control(void);
 IFX_EXTERN int get_lane(void);
 IFX_EXTERN void InfineonRacer_DotFullLane(sint32);
+IFX_EXTERN void InfineonRacer_detectObstacle(sint32);
 
 #endif
