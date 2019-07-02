@@ -160,6 +160,7 @@ void InfineonRacer_control(void){
 				IR_setMotor0Vol(-0.18);
 			}
 		}
+		/*
 		else {
 			// 차선이 감지되지 않는 경우를 count
 			if(!isLaneValid) {
@@ -184,9 +185,25 @@ void InfineonRacer_control(void){
 			}
 			// 새로운 차선을 감지(반대 angle을 주고) 일정시간이 지나면 원래 모드로 돌아간다
 			if(NewLane && cnt > 20) {
+				IR_setSrvAngle(0);
 				StartLaneChange = FALSE;
 				NewLane = FALSE;
 				ObstacleDetected = FALSE;
+			}
+		}
+		*/
+		else {
+			if(cnt > 80) {
+				IR_setSrvAngle(0);
+				StartLaneChange = FALSE;
+			}
+			else if(cnt > 50) {
+				if(isFullLane) {
+					IR_setSrvAngle(0.5);
+				}
+				else {
+					IR_setSrvAngle(-0.5);
+				}
 			}
 		}
 	}
