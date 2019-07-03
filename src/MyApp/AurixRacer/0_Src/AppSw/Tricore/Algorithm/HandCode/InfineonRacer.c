@@ -27,6 +27,7 @@
 InfineonRacer_t IR_Ctrl  /**< \brief  global data */
 		={64, 64, FALSE  };
 boolean isLaneValid = FALSE;
+boolean SchoolZone = FALSE;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -51,6 +52,8 @@ static float32 AdcResults[10] = { 0, };
 static boolean ObstacleDetected = FALSE;
 static float32 AdcResultSum = 0;
 
+static boolean ObstacleCount = FALSE;
+
 /******************************************************************************/
 /*-------------------------Function Implementations---------------------------*/
 /******************************************************************************/
@@ -66,6 +69,7 @@ void InfineonRacer_detectLane(void){
 	 */
 	int i;
 	int sum = 0;		// WIDTH 수만큼의 LineScan.adc 구간합
+	int sums[128];
 	int min_sum;		// 최소 구간합
 	int max_sum;		// 최대 구간합
 
@@ -79,6 +83,7 @@ void InfineonRacer_detectLane(void){
 	for(i = WIDTH; i < 128; i++){
 		sum += IR_LineScan.adcResult[0][i];
 		sum -= IR_LineScan.adcResult[0][i - WIDTH];
+		sums[i] = sum;
 		// 구간 합이 최소가 되는 곳이 lane
 		// 구간 중 가장 큰 값으로 설정함 (10~16이 최소구간이라면 lane = 16)
 		if(sum < min_sum){
@@ -119,6 +124,25 @@ void InfineonRacer_detectLane(void){
 		isLaneValid = FALSE;
 	}
 
+	/*	school zone 계산
+	 *
+	 */
+	int valid_sum = max_sum * VALID_RATIO;
+	for(i = WIDTH; i < 128; i++) {
+		if(sums[i] < valid_sum) {
+			if((lane - i) > 15 || (lane - i) < -15) {
+				if(ObstacleCount) {
+					SchoolZone = FALSE;
+				}
+				else {
+					SchoolZone = TRUE;
+				}
+				isLaneValid = FALSE;
+				break;
+			}
+		}
+	}
+
 	/* offset 계산
 	 * 중심 STANDARD로 부터 차가 떨어진 정도
 	 * OFFSET_MAX를 초과할 수 없음
@@ -147,16 +171,23 @@ void InfineonRacer_control(void){
 		// 주행 중 장애물을 만나면
 		// 초기 세팅을 하고 StartLaneChange 모드로 진입한다
 		if(ObstacleDetected) {
-			StartLaneChange = TRUE;
-			invalid_cnt = 0;
-			cnt = 0;
-			IR_setMotor0Vol(0);
-			// 차선변경하는 방향으로 angle을 최대한 꺾어준다
-			if(isFullLane) {
-				IR_setSrvAngle(-0.35);
+			if(!SchoolZone) {
+				IR_setMotor0Vol(0);
+				IR_setMotor0En(0);
 			}
 			else {
-				IR_setSrvAngle(0.55);
+				ObstacleCount = TRUE;
+				StartLaneChange = TRUE;
+				invalid_cnt = 0;
+				cnt = 0;
+				IR_setMotor0Vol(0);
+				// 차선변경하는 방향으로 angle을 최대한 꺾어준다
+				if(isFullLane) {
+					IR_setSrvAngle(-0.35);
+				}
+				else {
+					IR_setSrvAngle(0.55);
+				}
 			}
 		}
 	}
