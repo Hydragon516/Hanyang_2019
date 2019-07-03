@@ -67,11 +67,13 @@ void InfineonRacer_detectLane(void){
 	int i;
 	int sum = 0;		// WIDTH 수만큼의 LineScan.adc 구간합
 	int min_sum;		// 최소 구간합
+	int max_sum;		// 최대 구간합
 
 	for(i = 0; i < WIDTH; i++){
 		sum += IR_LineScan.adcResult[0][i];
 	}
 	min_sum = sum;
+	max_sum = sum;
 	lane = WIDTH - 1;
 
 	for(i = WIDTH; i < 128; i++){
@@ -83,10 +85,14 @@ void InfineonRacer_detectLane(void){
 			min_sum = sum;
 			lane = i;
 		}
+		if(sum > max_sum) {
+			max_sum = sum;
+		}
 	}
 	/* isLaneValid 계산
 	 * lane 구간 평균이 lane 제외구간 평균의 VALID_RATIO배 이상이어야 TRUE
 	 */
+	/*
 	int average = 0;
 	for(i = 0; i < lane - WIDTH; i++){
 		average += IR_LineScan.adcResult[0][i];
@@ -105,7 +111,13 @@ void InfineonRacer_detectLane(void){
 		isLaneValid = FALSE;
 		//printf("Lane : inValid\n");
 	}
-
+	 */
+	if(min_sum < (max_sum * VALID_RATIO)) {
+		isLaneValid = TRUE;
+	}
+	else {
+		isLaneValid = FALSE;
+	}
 
 	/* offset 계산
 	 * 중심 STANDARD로 부터 차가 떨어진 정도
