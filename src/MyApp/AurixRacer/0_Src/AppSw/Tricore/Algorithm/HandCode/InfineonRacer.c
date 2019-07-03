@@ -9,7 +9,7 @@
 /******************************************************************************/
 #define WIDTH (7)
 #define STANDARD (64)
-#define OFFSET_MAX (25)
+#define OFFSET_MAX (20)
 #define VALID_RATIO (0.4)
 
 /******************************************************************************/
@@ -41,7 +41,7 @@ static float angle;			// 서보모터 각도 (-0.5 ~ 0.5)
 static boolean StartLaneChange = FALSE;
 static int invalid_cnt = 0;
 static int cnt = 0;
-static boolean NewLane = FALSE;
+//static boolean NewLane = FALSE;
 static boolean isFullLane = TRUE;
 
 static boolean LaneDetected[50] = { 0, };
@@ -128,7 +128,8 @@ void InfineonRacer_control(void){
 	 */
 	if(!StartLaneChange){
 		if(isLaneValid){
-			angle = 0.5 * (offset / OFFSET_MAX);
+			angle = 0.45 * (offset / OFFSET_MAX);
+			angle = 0.1 + angle;
 			IR_setSrvAngle(angle);
 		}
 		// 주행 중 장애물을 만나면
@@ -140,10 +141,10 @@ void InfineonRacer_control(void){
 			IR_setMotor0Vol(0);
 			// 차선변경하는 방향으로 angle을 최대한 꺾어준다
 			if(isFullLane) {
-				IR_setSrvAngle(-0.5);
+				IR_setSrvAngle(-0.35);
 			}
 			else {
-				IR_setSrvAngle(0.5);
+				IR_setSrvAngle(0.55);
 			}
 		}
 	}
@@ -160,6 +161,7 @@ void InfineonRacer_control(void){
 				IR_setMotor0Vol(-0.18);
 			}
 		}
+		/*
 		else {
 			// 차선이 감지되지 않는 경우를 count
 			if(!isLaneValid) {
@@ -175,10 +177,10 @@ void InfineonRacer_control(void){
 						NewLane = TRUE;
 					}
 					if(isFullLane) {
-						IR_setSrvAngle(0.5);
+						IR_setSrvAngle(0.55);
 					}
 					else {
-						IR_setSrvAngle(-0.5);
+						IR_setSrvAngle(-0.35);
 					}
 				}
 			}
@@ -188,6 +190,22 @@ void InfineonRacer_control(void){
 				StartLaneChange = FALSE;
 				NewLane = FALSE;
 				ObstacleDetected = FALSE;
+			}
+		}
+		*/
+		else {
+			if(cnt > 120) {
+				IR_setSrvAngle(0);
+				StartLaneChange = FALSE;
+				ObstacleDetected = FALSE;
+			}
+			else if(cnt > 65) {
+				if(isFullLane) {
+					IR_setSrvAngle(0.55);
+				}
+				else {
+					IR_setSrvAngle(-0.35);
+				}
 			}
 		}
 	}
