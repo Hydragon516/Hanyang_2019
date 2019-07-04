@@ -59,9 +59,10 @@ static boolean ObstacleCount = FALSE;
 /******************************************************************************/
 void InfineonRacer_init(void){
 	IR_setMotor0Vol(-0.18);
+    printf("Adc[3] : %f\n", IR_AdcResult[3]);
 }
 
-void InfineonRacer_detectLane(void){
+void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	/* Lane Index 계산
 	 * WIDTH 개수의 LineScan.adc 합을 구하고 (구간합)
 	 * 그 합이 가장 작은 구간이 Lane
@@ -104,6 +105,9 @@ void InfineonRacer_detectLane(void){
 		isLaneValid = FALSE;
 	}
 
+	// 점선 실선 구분
+	InfineonRacer_DotFullLane((task_cnt_10m / 2) % 50);
+
 	/*	Speed Control Zone 계산
 	 *  valid한 다른 구간이 더 존재하는 지 검사
 	 *  그 구간이 min구간과 충분히 떨어져 있으면 lane이 두 개 이상임
@@ -140,12 +144,12 @@ void InfineonRacer_detectLane(void){
 	{
 		offset = -(OFFSET_MAX);
 	}
-
 }
 
 void InfineonRacer_control(void){
 	/* 일반적인 상황
 	 * angle이 offset에 linear하게 비례한다
+	 * angle : -0.35 ~ 0.55 (하드웨어상 0.1이 센터)
 	 */
 	if(!StartLaneChange){
 		if(isLaneValid){
@@ -223,12 +227,12 @@ void InfineonRacer_control(void){
 		}
 		*/
 		else {
-			if(cnt > 120) {
+			if(cnt > 110) {
 				IR_setSrvAngle(0);
 				StartLaneChange = FALSE;
 				ObstacleDetected = FALSE;
 			}
-			else if(cnt > 65) {
+			else if(cnt > 60) {
 				if(isFullLane) {
 					IR_setSrvAngle(0.55);
 				}
@@ -238,10 +242,6 @@ void InfineonRacer_control(void){
 			}
 		}
 	}
-}
-
-int get_lane(void){
-	return lane;
 }
 
 /* 점선 실선을 구분해서 isFullLane에 저장
@@ -269,10 +269,22 @@ void InfineonRacer_detectObstacle(sint32 task_cnt) {
 	AdcResultSum -= AdcResults[task_cnt];
 	AdcResultSum += AdcResult;
 	AdcResults[task_cnt] = IR_AdcResult[0];
-	if(AdcResultSum > 2.5) {
+	if(AdcResultSum > 5.8) {
 		ObstacleDetected = TRUE;
 	}
 //	if(task_cnt == 0) {
 //		printf("AdcResultSum : %f\n", AdcResultSum);
 //	}
+}
+
+boolean get_StartLaneChange(void) {
+	return StartLaneChange;
+}
+
+boolean get_ObstacleCount(void) {
+	return ObstacleCount;
+}
+
+int get_lane(void){
+	return lane;
 }

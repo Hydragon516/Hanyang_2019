@@ -53,8 +53,8 @@ void appTaskfu_10ms(void)
 
 	if(task_cnt_10m%2 == 0){
 		BasicLineScan_run();
-		InfineonRacer_detectLane();
-		InfineonRacer_DotFullLane((task_cnt_10m / 2) % 50);
+		InfineonRacer_detectLane(task_cnt_10m);
+		//InfineonRacer_DotFullLane((task_cnt_10m / 2) % 50);
 		BasicPort_run();
 		BasicGtmTom_run();
 		BasicVadcBgScan_run();
@@ -88,6 +88,20 @@ void appTaskfu_100ms(void)
 
 #endif
 
+	/*
+	if(task_cnt_100m % 2 == 0) {
+		int i;
+		printf("SpeedControlZone : ");
+		SpeedControlZone ? printf("TRUE\n") : printf("FALSE\n");
+		printf("ObstacleCount : ");
+		i = get_ObstacleCount();
+		i ? printf("TRUE\n") : printf("FALSE\n");
+		printf("StartLaneChange : ");
+		i = get_StartLaneChange();
+		i ? printf("TRUE\n") : printf("FALSE\n");
+		printf("\n");
+	}
+	*/
 }
 
 void appTaskfu_1000ms(void)
@@ -96,8 +110,9 @@ void appTaskfu_1000ms(void)
 	if(task_cnt_1000m == 1000){
 		task_cnt_1000m = 0;
 	}
-	printf("SchoolZone : ");
-	SchoolZone ? printf("TRUE\n") : printf("FALSE\n");
+	//printf("Led0 : %d\n", IR_Port.led0);
+	//printf("Adc[3] : %f\n", IR_AdcResult[3]);
+    //printf("Adc[3] : %f\n", IR_AdcResult[3]);
 }
 
 void appTaskfu_idle(void){

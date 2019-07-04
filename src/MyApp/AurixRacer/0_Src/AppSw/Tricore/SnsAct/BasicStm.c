@@ -39,6 +39,7 @@ typedef struct
 /******************************************************************************/
 
 Basic_Stm g_Stm; /**< \brief Stm global data */
+boolean FinalMode;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -176,6 +177,7 @@ void BasicStm_init(void)
 void BasicStm_run(void)
 {
 //    printf("BasicStm_run() called\n");
+
 	if(task_flag_1m == TRUE){
 		appTaskfu_1ms();
 		task_flag_1m = FALSE;

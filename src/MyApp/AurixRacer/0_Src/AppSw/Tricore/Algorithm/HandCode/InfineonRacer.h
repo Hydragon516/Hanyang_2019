@@ -40,10 +40,12 @@ IFX_EXTERN boolean SpeedControlZone;
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
 IFX_EXTERN void InfineonRacer_init(void);
-IFX_EXTERN void InfineonRacer_detectLane(void);
+IFX_EXTERN void InfineonRacer_detectLane(sint32);
 IFX_EXTERN void InfineonRacer_control(void);
 IFX_EXTERN int get_lane(void);
 IFX_EXTERN void InfineonRacer_DotFullLane(sint32);
 IFX_EXTERN void InfineonRacer_detectObstacle(sint32);
+IFX_EXTERN boolean get_StartLaneChange(void);
+IFX_EXTERN boolean get_ObstacleCount(void);
 
 #endif

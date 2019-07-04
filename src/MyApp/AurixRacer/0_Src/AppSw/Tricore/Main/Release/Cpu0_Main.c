@@ -94,7 +94,6 @@ int core0_main(void)
     //IR_setMotor0Vol(-0.17);
 
     //IR_setLed0(0);
-
     /* background endless loop */
     while (TRUE)
     {
