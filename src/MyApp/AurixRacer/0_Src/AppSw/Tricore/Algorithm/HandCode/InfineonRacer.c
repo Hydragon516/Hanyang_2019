@@ -27,7 +27,7 @@
 InfineonRacer_t IR_Ctrl  /**< \brief  global data */
 		={64, 64, FALSE  };
 boolean isLaneValid = FALSE;
-boolean SchoolZone = FALSE;
+boolean SpeedControlZone = FALSE;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -95,27 +95,7 @@ void InfineonRacer_detectLane(void){
 		}
 	}
 	/* isLaneValid 계산
-	 * lane 구간 평균이 lane 제외구간 평균의 VALID_RATIO배 이상이어야 TRUE
-	 */
-	/*
-	int average = 0;
-	for(i = 0; i < lane - WIDTH; i++){
-		average += IR_LineScan.adcResult[0][i];
-	}
-	for(i = lane; i < 128; i++){
-		average += IR_LineScan.adcResult[0][i];
-	}
-	average = average * WIDTH / (128 - WIDTH);
-	//printf("min_sum : %d\n", min_sum);
-	//printf("average : %d\n", average);
-	if(min_sum < (average * VALID_RATIO)){
-		isLaneValid = TRUE;
-		//printf("Lane : Valid\n");
-	}
-	else{
-		isLaneValid = FALSE;
-		//printf("Lane : inValid\n");
-	}
+	 * min구간 평균이 max구간 평균의 VALID_RATIO배 미만이어야 Valid
 	 */
 	if(min_sum < (max_sum * VALID_RATIO)) {
 		isLaneValid = TRUE;
@@ -124,19 +104,24 @@ void InfineonRacer_detectLane(void){
 		isLaneValid = FALSE;
 	}
 
-	/*	school zone 계산
-	 *
+	/*	Speed Control Zone 계산
+	 *  valid한 다른 구간이 더 존재하는 지 검사
+	 *  그 구간이 min구간과 충분히 떨어져 있으면 lane이 두 개 이상임
 	 */
 	int valid_sum = max_sum * VALID_RATIO;
 	for(i = WIDTH; i < 128; i++) {
 		if(sums[i] < valid_sum) {
+			// valid한 구간이 min구간과 15이상 떨어져 있으면 횡단보도
 			if((lane - i) > 15 || (lane - i) < -15) {
+				// 이전에 장애물이 있었다면 SCZ탈출
 				if(ObstacleCount) {
-					SchoolZone = FALSE;
+					SpeedControlZone = FALSE;
 				}
+				// 이전에 장애물이 한 번도 없었다면 SCZ 진입
 				else {
-					SchoolZone = TRUE;
+					SpeedControlZone = TRUE;
 				}
+				// lane이 두 개 이상 잡히면 inValid (횡단보도 통과시 안정적으로 주행하기 위함)
 				isLaneValid = FALSE;
 				break;
 			}
@@ -171,7 +156,8 @@ void InfineonRacer_control(void){
 		// 주행 중 장애물을 만나면
 		// 초기 세팅을 하고 StartLaneChange 모드로 진입한다
 		if(ObstacleDetected) {
-			if(!SchoolZone) {
+			// SCZ가 아니라면 비상제동
+			if(!SpeedControlZone) {
 				IR_setMotor0Vol(0);
 				IR_setMotor0En(0);
 			}

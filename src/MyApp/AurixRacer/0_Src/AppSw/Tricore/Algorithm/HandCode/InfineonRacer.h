@@ -35,7 +35,7 @@ typedef struct{
 /******************************************************************************/
 IFX_EXTERN InfineonRacer_t IR_Ctrl;
 IFX_EXTERN boolean isLaneValid;
-IFX_EXTERN boolean SchoolZone;
+IFX_EXTERN boolean SpeedControlZone;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
