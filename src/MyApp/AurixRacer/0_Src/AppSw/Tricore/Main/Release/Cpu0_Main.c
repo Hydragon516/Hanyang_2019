@@ -13,6 +13,7 @@
 #include "SysSe/Bsp/Bsp.h"
 #include "IfxScuWdt.h"
 #include "BasicStm.h"
+#include "InfineonRacer.h"
 
 #if BOARD == APPLICATION_KIT_TC237
 #include <Tft/conio_tft.h>
@@ -92,8 +93,6 @@ int core0_main(void)
     IR_setMotor0En(1);
 
     /* background endless loop */
-    printf("FINALMODE : ");
-    FINALMODE ? printf("TRUE\n") : printf("FALSE\n");
     if(FINALMODE) {
     	while (TRUE)
     	{

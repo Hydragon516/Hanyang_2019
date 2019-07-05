@@ -1,4 +1,5 @@
 #include "AppTaskFu.h"
+#include "InfineonRacer.h"
 
 static sint32 task_cnt_1m = 0;
 static sint32 task_cnt_10m = 0;
@@ -72,12 +73,6 @@ void appTaskfu_10ms(void)
 		}
 		AsclinShellInterface_runLineScan();
 
-		if(SpeedControlZone) {
-			IR_setLed0(TRUE);
-		}
-		else {
-			IR_setLed0(FALSE);
-		}
 	}
 
 }
@@ -97,6 +92,9 @@ void appTaskfu_100ms(void)
 
 #endif
 
+	if(FINALMODE) {
+		IR_setLed0(TRUE);
+	}
 
 	if(task_cnt_100m % 2 == 0) {
 		int i;
@@ -176,6 +174,9 @@ void appTaskfu_100ms_trial(void)
 
 #endif
 
+	if(!FINALMODE) {
+		IR_setLed0(FALSE);
+	}
 }
 
 void appTaskfu_1000ms_trial(void)

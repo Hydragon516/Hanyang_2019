@@ -27,7 +27,7 @@
 InfineonRacer_t IR_Ctrl  /**< \brief  global data */
 		={64, 64, FALSE  };
 boolean isLaneValid = FALSE;
-boolean SpeedControlZone = FALSE;
+boolean SpeedControlZone = TRUE;
 boolean FINALMODE;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
@@ -61,7 +61,6 @@ static boolean ObstacleCount = FALSE;
 void InfineonRacer_init(void){
 	IR_setMotor0Vol(-0.2);
 	IR_setSrvAngle(0.1);
-	SpeedControlZone = FALSE;
 
     BasicVadcBgScan_run();
     printf("<InfineonRacer_init> Adc[3] : %f\n", IR_AdcResult[3]);
@@ -134,10 +133,6 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 				// 이전에 장애물이 있었다면 SCZ탈출
 				if(ObstacleCount) {
 					SpeedControlZone = FALSE;
-				}
-				// 이전에 장애물이 한 번도 없었다면 SCZ 진입
-				else {
-					SpeedControlZone = TRUE;
 				}
 				// lane이 두 개 이상 잡히면 inValid (횡단보도 통과시 안정적으로 주행하기 위함)
 				isLaneValid = FALSE;
