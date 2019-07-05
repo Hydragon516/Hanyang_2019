@@ -9,7 +9,7 @@
 /******************************************************************************/
 #define WIDTH (7)
 #define STANDARD (64)
-#define OFFSET_MAX (20)
+#define OFFSET_MAX (25)
 #define VALID_RATIO (0.4)
 
 /******************************************************************************/
@@ -28,6 +28,7 @@ InfineonRacer_t IR_Ctrl  /**< \brief  global data */
 		={64, 64, FALSE  };
 boolean isLaneValid = FALSE;
 boolean SpeedControlZone = FALSE;
+boolean FINALMODE;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -58,8 +59,21 @@ static boolean ObstacleCount = FALSE;
 /*-------------------------Function Implementations---------------------------*/
 /******************************************************************************/
 void InfineonRacer_init(void){
-	IR_setMotor0Vol(-0.18);
-    printf("Adc[3] : %f\n", IR_AdcResult[3]);
+	IR_setMotor0Vol(-0.2);
+	IR_setSrvAngle(0.1);
+	SpeedControlZone = FALSE;
+
+    BasicVadcBgScan_run();
+    printf("<InfineonRacer_init> Adc[3] : %f\n", IR_AdcResult[3]);
+#ifndef __RACEMODE__
+#define __RACEMODE__
+    if(IR_AdcResult[3] > 0.5) {
+    	FINALMODE = FALSE;
+    }
+    else {
+    	FINALMODE = TRUE;
+    }
+#endif
 }
 
 void InfineonRacer_detectLane(sint32 task_cnt_10m){
@@ -74,14 +88,14 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	int min_sum;		// 최소 구간합
 	int max_sum;		// 최대 구간합
 
-	for(i = 0; i < WIDTH; i++){
+	for(i = 2; i < WIDTH + 2; i++){
 		sum += IR_LineScan.adcResult[0][i];
 	}
 	min_sum = sum;
 	max_sum = sum;
-	lane = WIDTH - 1;
+	lane = WIDTH + 1;
 
-	for(i = WIDTH; i < 128; i++){
+	for(i = WIDTH; i < 126; i++){
 		sum += IR_LineScan.adcResult[0][i];
 		sum -= IR_LineScan.adcResult[0][i - WIDTH];
 		sums[i] = sum;
@@ -113,7 +127,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	 *  그 구간이 min구간과 충분히 떨어져 있으면 lane이 두 개 이상임
 	 */
 	int valid_sum = max_sum * VALID_RATIO;
-	for(i = WIDTH; i < 128; i++) {
+	for(i = WIDTH + 2; i < 126; i++) {
 		if(sums[i] < valid_sum) {
 			// valid한 구간이 min구간과 15이상 떨어져 있으면 횡단보도
 			if((lane - i) > 15 || (lane - i) < -15) {
@@ -190,8 +204,8 @@ void InfineonRacer_control(void){
 		cnt++;
 		// 잠시 멈췄다가 출발
 		if(IR_Motor.Motor0Vol == 0) {
-			if(cnt > 10) {
-				IR_setMotor0Vol(-0.18);
+			if(cnt > 20) {
+				IR_setMotor0Vol(-0.2);
 			}
 		}
 		/*
@@ -227,17 +241,22 @@ void InfineonRacer_control(void){
 		}
 		*/
 		else {
-			if(cnt > 110) {
+			if(cnt > 160) {
 				IR_setSrvAngle(0);
 				StartLaneChange = FALSE;
 				ObstacleDetected = FALSE;
 			}
-			else if(cnt > 60) {
+			else if(cnt > 100) {
+				IR_setMotor0Vol(-0.2);
+			}
+			else if(cnt > 80) {
 				if(isFullLane) {
 					IR_setSrvAngle(0.55);
+					IR_setMotor0Vol(0);
 				}
 				else {
 					IR_setSrvAngle(-0.35);
+					IR_setMotor0Vol(0);
 				}
 			}
 		}
@@ -269,7 +288,7 @@ void InfineonRacer_detectObstacle(sint32 task_cnt) {
 	AdcResultSum -= AdcResults[task_cnt];
 	AdcResultSum += AdcResult;
 	AdcResults[task_cnt] = IR_AdcResult[0];
-	if(AdcResultSum > 5.8) {
+	if(AdcResultSum > 5.4) {
 		ObstacleDetected = TRUE;
 	}
 //	if(task_cnt == 0) {
@@ -287,4 +306,62 @@ boolean get_ObstacleCount(void) {
 
 int get_lane(void){
 	return lane;
+}
+
+void InfineonRacer_detectLane_trial(void) {
+	int i;
+	int sum = 0;		// WIDTH 수만큼의 LineScan.adc 구간합
+	int min_sum;		// 최소 구간합
+	int max_sum;		// 최대 구간합
+
+	for(i = 2; i < WIDTH + 2; i++){
+		sum += IR_LineScan.adcResult[0][i];
+	}
+	min_sum = sum;
+	max_sum = sum;
+	lane = WIDTH + 1;
+
+	for(i = WIDTH; i < 126; i++){
+		sum += IR_LineScan.adcResult[0][i];
+		sum -= IR_LineScan.adcResult[0][i - WIDTH];
+		// 구간 합이 최소가 되는 곳이 lane
+		// 구간 중 가장 큰 값으로 설정함 (10~16이 최소구간이라면 lane = 16)
+		if(sum < min_sum){
+			min_sum = sum;
+			lane = i;
+		}
+		if(sum > max_sum) {
+			max_sum = sum;
+		}
+	}
+	/* isLaneValid 계산
+	 * min구간 평균이 max구간 평균의 VALID_RATIO배 미만이어야 Valid
+	 */
+	if(min_sum < (max_sum * VALID_RATIO)) {
+		isLaneValid = TRUE;
+	}
+	else {
+		isLaneValid = FALSE;
+	}
+
+	/* offset 계산
+	 * 중심 STANDARD로 부터 차가 떨어진 정도
+	 * OFFSET_MAX를 초과할 수 없음
+	 */
+	offset = STANDARD - lane; // 양수 : 차가 왼쪽에 있음, 음수 : 차가 오른쪽에 있음
+	if(offset > OFFSET_MAX){
+		offset = OFFSET_MAX;
+	}
+	else if(offset < -(OFFSET_MAX))
+	{
+		offset = -(OFFSET_MAX);
+	}
+}
+
+void InfineonRacer_control_trial(void) {
+	if(isLaneValid) {
+		angle = 0.45 * (offset / OFFSET_MAX);
+		angle = 0.1 + angle;
+		IR_setSrvAngle(angle);
+	}
 }

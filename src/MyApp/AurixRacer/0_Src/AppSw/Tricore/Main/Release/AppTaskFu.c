@@ -32,6 +32,9 @@ void appTaskfu_init(void){
 #else
 
 #endif
+    /* 버튼 값 받아오기
+     * 예선 결선 모드
+     */
 }
 
 void appTaskfu_1ms(void)
@@ -54,7 +57,6 @@ void appTaskfu_10ms(void)
 	if(task_cnt_10m%2 == 0){
 		BasicLineScan_run();
 		InfineonRacer_detectLane(task_cnt_10m);
-		//InfineonRacer_DotFullLane((task_cnt_10m / 2) % 50);
 		BasicPort_run();
 		BasicGtmTom_run();
 		BasicVadcBgScan_run();
@@ -69,6 +71,13 @@ void appTaskfu_10ms(void)
 			#endif
 		}
 		AsclinShellInterface_runLineScan();
+
+		if(SpeedControlZone) {
+			IR_setLed0(TRUE);
+		}
+		else {
+			IR_setLed0(FALSE);
+		}
 	}
 
 }
@@ -88,7 +97,7 @@ void appTaskfu_100ms(void)
 
 #endif
 
-	/*
+
 	if(task_cnt_100m % 2 == 0) {
 		int i;
 		printf("SpeedControlZone : ");
@@ -101,7 +110,7 @@ void appTaskfu_100ms(void)
 		i ? printf("TRUE\n") : printf("FALSE\n");
 		printf("\n");
 	}
-	*/
+
 }
 
 void appTaskfu_1000ms(void)
@@ -113,6 +122,68 @@ void appTaskfu_1000ms(void)
 	//printf("Led0 : %d\n", IR_Port.led0);
 	//printf("Adc[3] : %f\n", IR_AdcResult[3]);
     //printf("Adc[3] : %f\n", IR_AdcResult[3]);
+}
+
+void appTaskfu_1ms_trial(void)
+{
+	task_cnt_1m++;
+	if(task_cnt_1m == 1000){
+		task_cnt_1m = 0;
+	}
+}
+
+
+void appTaskfu_10ms_trial(void)
+{
+	task_cnt_10m++;
+	if(task_cnt_10m == 1000){
+		task_cnt_10m = 0;
+	}
+
+	if(task_cnt_10m%2 == 0){
+		BasicLineScan_run();
+		InfineonRacer_detectLane_trial();
+		BasicPort_run();
+		BasicGtmTom_run();
+		BasicVadcBgScan_run();
+
+		if(IR_Ctrl.basicTest == FALSE){
+			#if CODE == CODE_HAND
+				InfineonRacer_control_trial();
+			#elif CODE == CODE_ERT
+				IR_Controller_step();
+			#else
+
+			#endif
+		}
+		AsclinShellInterface_runLineScan();
+	}
+
+}
+
+void appTaskfu_100ms_trial(void)
+{
+	task_cnt_100m++;
+	if(task_cnt_100m == 1000){
+		task_cnt_100m = 0;
+	}
+#if BOARD == APPLICATION_KIT_TC237
+	if(task_cnt_100m % REFRESH_TFT == 0){
+		tft_app_run();
+	}
+
+#elif BOARD == SHIELD_BUDDY
+
+#endif
+
+}
+
+void appTaskfu_1000ms_trial(void)
+{
+	task_cnt_1000m++;
+	if(task_cnt_1000m == 1000){
+		task_cnt_1000m = 0;
+	}
 }
 
 void appTaskfu_idle(void){

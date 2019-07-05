@@ -42,5 +42,6 @@
 /******************************************************************************/
 IFX_EXTERN void BasicStm_init(void);
 IFX_EXTERN void BasicStm_run(void);
+IFX_EXTERN void BasicStm_run_trial(void);
 
 #endif

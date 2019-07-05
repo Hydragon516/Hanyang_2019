@@ -89,15 +89,22 @@ int core0_main(void)
 
     /* Demo init */
     BasicStm_init();
-    //printf("main : IR_setMotor0En(1)\n");
     IR_setMotor0En(1);
-    //IR_setMotor0Vol(-0.17);
 
-    //IR_setLed0(0);
     /* background endless loop */
-    while (TRUE)
-    {
-        BasicStm_run();
+    printf("FINALMODE : ");
+    FINALMODE ? printf("TRUE\n") : printf("FALSE\n");
+    if(FINALMODE) {
+    	while (TRUE)
+    	{
+    		BasicStm_run();
+    	}
+    }
+    else {
+    	while (TRUE)
+    	{
+    		BasicStm_run_trial();
+    	}
     }
 
     return 0;

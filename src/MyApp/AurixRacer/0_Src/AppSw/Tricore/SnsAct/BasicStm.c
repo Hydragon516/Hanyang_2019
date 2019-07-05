@@ -39,7 +39,6 @@ typedef struct
 /******************************************************************************/
 
 Basic_Stm g_Stm; /**< \brief Stm global data */
-boolean FinalMode;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -195,6 +194,32 @@ void BasicStm_run(void)
 
 	if(task_flag_1000m == TRUE){
 		appTaskfu_1000ms();
+		task_flag_1000m = FALSE;
+	}
+
+	appTaskfu_idle();
+}
+
+void BasicStm_run_trial(void)
+{
+
+	if(task_flag_1m == TRUE){
+		appTaskfu_1ms_trial();
+		task_flag_1m = FALSE;
+	}
+
+	if(task_flag_10m == TRUE){
+		appTaskfu_10ms_trial();
+		task_flag_10m = FALSE;
+	}
+
+	if(task_flag_100m == TRUE){
+		appTaskfu_100ms_trial();
+		task_flag_100m = FALSE;
+	}
+
+	if(task_flag_1000m == TRUE){
+		appTaskfu_1000ms_trial();
 		task_flag_1000m = FALSE;
 	}
 

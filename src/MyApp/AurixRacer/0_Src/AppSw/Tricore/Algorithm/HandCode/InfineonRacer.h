@@ -36,6 +36,7 @@ typedef struct{
 IFX_EXTERN InfineonRacer_t IR_Ctrl;
 IFX_EXTERN boolean isLaneValid;
 IFX_EXTERN boolean SpeedControlZone;
+IFX_EXTERN boolean FINALMODE;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -47,5 +48,7 @@ IFX_EXTERN void InfineonRacer_DotFullLane(sint32);
 IFX_EXTERN void InfineonRacer_detectObstacle(sint32);
 IFX_EXTERN boolean get_StartLaneChange(void);
 IFX_EXTERN boolean get_ObstacleCount(void);
+IFX_EXTERN void InfineonRacer_detectLane_trial(void);
+IFX_EXTERN void InfineonRacer_control_trial(void);
 
 #endif
