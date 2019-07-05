@@ -68,6 +68,7 @@ void InfineonRacer_init(void){
 #define __RACEMODE__
     if(IR_AdcResult[3] > 0.5) {
     	FINALMODE = FALSE;
+    	IR_setMotor0Vol(-0.25);
     }
     else {
     	FINALMODE = TRUE;
@@ -125,18 +126,20 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	 *  valid한 다른 구간이 더 존재하는 지 검사
 	 *  그 구간이 min구간과 충분히 떨어져 있으면 lane이 두 개 이상임
 	 */
-	int valid_sum = max_sum * VALID_RATIO;
-	for(i = WIDTH + 2; i < 126; i++) {
-		if(sums[i] < valid_sum) {
-			// valid한 구간이 min구간과 15이상 떨어져 있으면 횡단보도
-			if((lane - i) > 15 || (lane - i) < -15) {
-				// 이전에 장애물이 있었다면 SCZ탈출
-				if(ObstacleCount) {
-					SpeedControlZone = FALSE;
+	if(!StartLaneChange) {
+		int valid_sum = max_sum * VALID_RATIO;
+		for(i = WIDTH + 2; i < 126; i++) {
+			if(sums[i] < valid_sum) {
+				// valid한 구간이 min구간과 15이상 떨어져 있으면 횡단보도
+				if((lane - i) > 15 || (lane - i) < -15) {
+					// 이전에 장애물이 있었다면 SCZ탈출
+					if(ObstacleCount) {
+						SpeedControlZone = FALSE;
+					}
+					// lane이 두 개 이상 잡히면 inValid (횡단보도 통과시 안정적으로 주행하기 위함)
+					isLaneValid = FALSE;
+					break;
 				}
-				// lane이 두 개 이상 잡히면 inValid (횡단보도 통과시 안정적으로 주행하기 위함)
-				isLaneValid = FALSE;
-				break;
 			}
 		}
 	}
@@ -236,20 +239,32 @@ void InfineonRacer_control(void){
 		}
 		*/
 		else {
-			if(cnt > 160) {
-				IR_setSrvAngle(0);
-				StartLaneChange = FALSE;
-				ObstacleDetected = FALSE;
-			}
-			else if(cnt > 100) {
-				IR_setMotor0Vol(-0.2);
-			}
-			else if(cnt > 80) {
-				if(isFullLane) {
+			//왼쪽차선변경
+			if(isFullLane) {
+				if(cnt > 155) {
+					IR_setSrvAngle(0);
+					StartLaneChange = FALSE;
+					ObstacleDetected = FALSE;
+				}
+				else if(cnt > 98) {
+					IR_setMotor0Vol(-0.2);
+				}
+				else if(cnt > 78) {
 					IR_setSrvAngle(0.55);
 					IR_setMotor0Vol(0);
 				}
-				else {
+			}
+			//오른쪽차선변경
+			else {
+				if(cnt > 165) {
+					IR_setSrvAngle(0);
+					StartLaneChange = FALSE;
+					ObstacleDetected = FALSE;
+				}
+				else if(cnt > 113) {
+					IR_setMotor0Vol(-0.2);
+				}
+				else if(cnt > 93) {
 					IR_setSrvAngle(-0.35);
 					IR_setMotor0Vol(0);
 				}

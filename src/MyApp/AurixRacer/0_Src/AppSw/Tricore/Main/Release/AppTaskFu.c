@@ -73,6 +73,12 @@ void appTaskfu_10ms(void)
 		}
 		AsclinShellInterface_runLineScan();
 
+		if(SpeedControlZone) {
+			IR_setLed0(TRUE);
+		}
+		else {
+			IR_setLed0(FALSE);
+		}
 	}
 
 }
@@ -91,10 +97,6 @@ void appTaskfu_100ms(void)
 #elif BOARD == SHIELD_BUDDY
 
 #endif
-
-	if(FINALMODE) {
-		IR_setLed0(TRUE);
-	}
 
 	if(task_cnt_100m % 2 == 0) {
 		int i;
