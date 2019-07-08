@@ -167,12 +167,12 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 void InfineonRacer_control(void){
 	/* 일반적인 상황
 	 * angle이 offset에 linear하게 비례한다
-	 * angle : -0.35 ~ 0.55 (하드웨어상 0.1이 센터)
+	 * angle : -0.35 ~ 0.6 (하드웨어상 0.125가 센터)
 	 */
 	if(!StartLaneChange){
 		if(isLaneValid){
-			angle = 0.45 * (offset / OFFSET_MAX);
-			angle = 0.1 + angle;
+			angle = 0.475 * (offset / OFFSET_MAX);
+			angle = 0.125 + angle;
 			IR_setSrvAngle(angle);
 		}
 		// SpeedControlZone 주행 중 장애물을 만나면
@@ -189,7 +189,7 @@ void InfineonRacer_control(void){
 					IR_setSrvAngle(-0.35);
 				}
 				else {
-					IR_setSrvAngle(0.55);
+					IR_setSrvAngle(0.6);
 				}
 			}
 		}
@@ -258,7 +258,7 @@ void InfineonRacer_control(void){
 					IR_setMotor0Vol(-0.2);
 				}
 				else if(cnt > 70) {
-					IR_setSrvAngle(0.55);
+					IR_setSrvAngle(0.6);
 					IR_setMotor0Vol(0);
 				}
 			}
@@ -386,8 +386,8 @@ void InfineonRacer_detectLane_trial(void) {
 
 void InfineonRacer_control_trial(void) {
 	if(isLaneValid) {
-		angle = 0.45 * (offset / OFFSET_MAX);
-		angle = 0.1 + angle;
+		angle = 0.475 * (offset / OFFSET_MAX);
+		angle = 0.125 + angle;
 		IR_setSrvAngle(angle);
 	}
 }
