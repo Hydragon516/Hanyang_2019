@@ -98,8 +98,10 @@ void appTaskfu_100ms(void)
 
 #endif
 
+
 	if(task_cnt_100m % 2 == 0) {
 		int i;
+		/*
 		printf("SpeedControlZone : ");
 		SpeedControlZone ? printf("TRUE\n") : printf("FALSE\n");
 		printf("ObstacleCount : ");
@@ -109,7 +111,11 @@ void appTaskfu_100ms(void)
 		i = get_StartLaneChange();
 		i ? printf("TRUE\n") : printf("FALSE\n");
 		printf("\n");
+		*/
+		printf("LeftLaneValid : ");
+		LeftLaneValid ? printf("TRUE\n") : printf("FALSE\n");
 	}
+
 
 }
 

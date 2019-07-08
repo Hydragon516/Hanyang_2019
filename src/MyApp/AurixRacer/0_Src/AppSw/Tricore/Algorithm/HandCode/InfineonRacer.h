@@ -34,7 +34,8 @@ typedef struct{
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
 IFX_EXTERN InfineonRacer_t IR_Ctrl;
-IFX_EXTERN boolean isLaneValid;
+IFX_EXTERN boolean RightLaneValid;
+IFX_EXTERN boolean LeftLaneValid;
 IFX_EXTERN boolean SpeedControlZone;
 IFX_EXTERN boolean FINALMODE;
 /******************************************************************************/
