@@ -98,7 +98,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	max_sum = sum;
 	lane = WIDTH + 1;
 
-	for(i = WIDTH; i < 126; i++){
+	for(i = WIDTH + 2; i < 126; i++){
 		sum += IR_LineScan.adcResult[0][i];
 		sum -= IR_LineScan.adcResult[0][i - WIDTH];
 		sums[i] = sum;
