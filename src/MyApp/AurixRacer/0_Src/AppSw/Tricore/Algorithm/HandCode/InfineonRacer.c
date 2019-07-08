@@ -8,7 +8,7 @@
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
 #define WIDTH (7)
-#define STANDARD (64)
+#define STANDARD_RIGHT (64)
 #define OFFSET_MAX (25)
 #define VALID_RATIO (0.4)
 
@@ -86,36 +86,46 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	 * Lane : 0 ~ 127
 	 */
 	int i;
-	int sum = 0;		// WIDTH 수만큼의 LineScan.adc 구간합
-	int sums[128];
-	int min_sum;		// 최소 구간합
-	int max_sum;		// 최대 구간합
+	int sum_right = 0;		// WIDTH 수만큼의 LineScan.adc 구간합
+	int sum_left = 0;
+	int sums_right[128];
+	int sums_left[128];
+	int min_sum_right;		// 최소 구간합
+	int min_sum_left;
+	int max_sum_right;		// 최대 구간합
+	int max_sum_left;
 
 	for(i = 2; i < WIDTH + 2; i++){
-		sum += IR_LineScan.adcResult[0][i];
+		sum_right += IR_LineScan.adcResult[0][i];
+		sum_left += IR_LineScan.adcResult[1][i];
 	}
-	min_sum = sum;
-	max_sum = sum;
+	min_sum_right = sum_right;
+	min_sum_left = sum_left;
+	max_sum_right = sum_right;
+	max_sum_left = sum_left;
 	lane = WIDTH + 1;
 
-	for(i = WIDTH; i < 126; i++){
-		sum += IR_LineScan.adcResult[0][i];
-		sum -= IR_LineScan.adcResult[0][i - WIDTH];
-		sums[i] = sum;
+	for(i = WIDTH + 2; i < 126; i++){
+		sum_right += IR_LineScan.adcResult[0][i];
+		sum_left += IR_LineScan.adcResult[1][i];
+		sum_right -= IR_LineScan.adcResult[0][i - WIDTH];
+		sum_left -= IR_LineScan.adcResult[1][i - WIDTH];
+		sums_right[i] = sum_right;
+		sums_left[i] = sum_left;
 		// 구간 합이 최소가 되는 곳이 lane
 		// 구간 중 가장 큰 값으로 설정함 (10~16이 최소구간이라면 lane = 16)
-		if(sum < min_sum){
-			min_sum = sum;
+		if(sum_right < min_sum_right){
+			min_sum_right = sum_right;
 			lane = i;
 		}
-		if(sum > max_sum) {
-			max_sum = sum;
+		if(sum_right > max_sum_right) {
+			max_sum_right = sum_right;
 		}
 	}
 	/* isLaneValid 계산
 	 * min구간 평균이 max구간 평균의 VALID_RATIO배 미만이어야 Valid
 	 */
-	if(min_sum < (max_sum * VALID_RATIO)) {
+	if(min_sum_right < (max_sum_right * VALID_RATIO)) {
 		isLaneValid = TRUE;
 	}
 	else {
@@ -130,9 +140,9 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	 *  그 구간이 min구간과 충분히 떨어져 있으면 lane이 두 개 이상임
 	 */
 	if(!StartLaneChange) {
-		int valid_sum = max_sum * VALID_RATIO;
+		int valid_sum_right = max_sum_right * VALID_RATIO;
 		for(i = WIDTH + 2; i < 126; i++) {
-			if(sums[i] < valid_sum) {
+			if(sums_right[i] < valid_sum_right) {
 				// valid한 구간이 min구간과 15이상 떨어져 있으면 횡단보도
 				if((lane - i) > 15 || (lane - i) < -15) {
 					// 이전에 장애물이 있었다면 SCZ탈출
@@ -154,7 +164,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	 * 중심 STANDARD로 부터 차가 떨어진 정도
 	 * OFFSET_MAX를 초과할 수 없음
 	 */
-	offset = STANDARD - lane; // 양수 : 차가 왼쪽에 있음, 음수 : 차가 오른쪽에 있음
+	offset = STANDARD_RIGHT - lane; // 양수 : 차가 왼쪽에 있음, 음수 : 차가 오른쪽에 있음
 	if(offset > OFFSET_MAX){
 		offset = OFFSET_MAX;
 	}
@@ -374,7 +384,7 @@ void InfineonRacer_detectLane_trial(void) {
 	 * 중심 STANDARD로 부터 차가 떨어진 정도
 	 * OFFSET_MAX를 초과할 수 없음
 	 */
-	offset = STANDARD - lane; // 양수 : 차가 왼쪽에 있음, 음수 : 차가 오른쪽에 있음
+	offset = STANDARD_RIGHT - lane; // 양수 : 차가 왼쪽에 있음, 음수 : 차가 오른쪽에 있음
 	if(offset > OFFSET_MAX){
 		offset = OFFSET_MAX;
 	}
