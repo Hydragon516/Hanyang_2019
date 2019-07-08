@@ -49,9 +49,13 @@ static boolean isFullLane = TRUE;
 static boolean LaneDetected[50] = { 0, };
 static int LaneDetectedSum = 0;
 
-static float32 AdcResults[10] = { 0, };
+static float32 AdcResults0[10] = { 0, };
+static float32 AdcResult0Sum = 0;
+static float32 AdcResults1[10] = { 0, };
+static float32 AdcResult1Sum = 0;
 static boolean ObstacleDetected = FALSE;
-static float32 AdcResultSum = 0;
+
+static boolean EmergencyStop = FALSE;
 
 static boolean ObstacleCount = FALSE;
 
@@ -60,7 +64,7 @@ static boolean ObstacleCount = FALSE;
 /******************************************************************************/
 void InfineonRacer_init(void){
 	IR_setMotor0Vol(-0.2);
-	IR_setSrvAngle(0.1);
+	IR_setSrvAngle(0.12);
 
     BasicVadcBgScan_run();
     printf("<InfineonRacer_init> Adc[3] : %f\n", IR_AdcResult[3]);
@@ -68,7 +72,6 @@ void InfineonRacer_init(void){
 #define __RACEMODE__
     if(IR_AdcResult[3] > 0.5) {
     	FINALMODE = FALSE;
-    	IR_setMotor0Vol(-0.25);
     }
     else {
     	FINALMODE = TRUE;
@@ -135,6 +138,9 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 					// 이전에 장애물이 있었다면 SCZ탈출
 					if(ObstacleCount) {
 						SpeedControlZone = FALSE;
+						if(!EmergencyStop) {
+							IR_setMotor0Vol(-0.22);
+						}
 					}
 					// lane이 두 개 이상 잡히면 inValid (횡단보도 통과시 안정적으로 주행하기 위함)
 					isLaneValid = FALSE;
@@ -169,15 +175,10 @@ void InfineonRacer_control(void){
 			angle = 0.1 + angle;
 			IR_setSrvAngle(angle);
 		}
-		// 주행 중 장애물을 만나면
+		// SpeedControlZone 주행 중 장애물을 만나면
 		// 초기 세팅을 하고 StartLaneChange 모드로 진입한다
-		if(ObstacleDetected) {
-			// SCZ가 아니라면 비상제동
-			if(!SpeedControlZone) {
-				IR_setMotor0Vol(0);
-				IR_setMotor0En(0);
-			}
-			else {
+		if(SpeedControlZone) {
+			if(ObstacleDetected) {
 				ObstacleCount = TRUE;
 				StartLaneChange = TRUE;
 				invalid_cnt = 0;
@@ -190,6 +191,13 @@ void InfineonRacer_control(void){
 				else {
 					IR_setSrvAngle(0.55);
 				}
+			}
+		}
+		// SpeedControlZone이 아닌경우
+		// 장애물을 만나면 비상제동
+		else {
+			if(EmergencyStop) {
+				IR_setMotor0Vol(0);
 			}
 		}
 	}
@@ -241,30 +249,30 @@ void InfineonRacer_control(void){
 		else {
 			//왼쪽차선변경
 			if(isFullLane) {
-				if(cnt > 155) {
+				if(cnt > 135) {
 					IR_setSrvAngle(0);
 					StartLaneChange = FALSE;
 					ObstacleDetected = FALSE;
 				}
-				else if(cnt > 98) {
+				else if(cnt > 90) {
 					IR_setMotor0Vol(-0.2);
 				}
-				else if(cnt > 78) {
+				else if(cnt > 70) {
 					IR_setSrvAngle(0.55);
 					IR_setMotor0Vol(0);
 				}
 			}
 			//오른쪽차선변경
 			else {
-				if(cnt > 165) {
+				if(cnt > 145) {
 					IR_setSrvAngle(0);
 					StartLaneChange = FALSE;
 					ObstacleDetected = FALSE;
 				}
-				else if(cnt > 113) {
+				else if(cnt > 105) {
 					IR_setMotor0Vol(-0.2);
 				}
-				else if(cnt > 93) {
+				else if(cnt > 85) {
 					IR_setSrvAngle(-0.35);
 					IR_setMotor0Vol(0);
 				}
@@ -294,16 +302,24 @@ void InfineonRacer_DotFullLane(sint32 task_cnt) {
 }
 
 void InfineonRacer_detectObstacle(sint32 task_cnt) {
-	float32 AdcResult = IR_AdcResult[0];
-	AdcResultSum -= AdcResults[task_cnt];
-	AdcResultSum += AdcResult;
-	AdcResults[task_cnt] = IR_AdcResult[0];
-	if(AdcResultSum > 5.4) {
+	float32 AdcResult0 = IR_AdcResult[0];
+	float32 AdcResult1 = IR_AdcResult[1];
+
+	AdcResult0Sum -= AdcResults0[task_cnt];
+	AdcResult0Sum += AdcResult0;
+	AdcResults0[task_cnt] = AdcResult0;
+
+	AdcResult1Sum -= AdcResults1[task_cnt];
+	AdcResult1Sum += AdcResult1;
+	AdcResults1[task_cnt] = AdcResult1;
+
+	if(AdcResult0Sum > 5.4) {
 		ObstacleDetected = TRUE;
 	}
-//	if(task_cnt == 0) {
-//		printf("AdcResultSum : %f\n", AdcResultSum);
-//	}
+
+	if(!SpeedControlZone && AdcResult1Sum > 2.0) {
+		EmergencyStop = TRUE;
+	}
 }
 
 boolean get_StartLaneChange(void) {

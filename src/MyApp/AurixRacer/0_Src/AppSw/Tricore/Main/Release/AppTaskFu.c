@@ -176,9 +176,6 @@ void appTaskfu_100ms_trial(void)
 
 #endif
 
-	if(!FINALMODE) {
-		IR_setLed0(FALSE);
-	}
 }
 
 void appTaskfu_1000ms_trial(void)
@@ -187,6 +184,7 @@ void appTaskfu_1000ms_trial(void)
 	if(task_cnt_1000m == 1000){
 		task_cnt_1000m = 0;
 	}
+
 }
 
 void appTaskfu_idle(void){
