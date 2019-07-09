@@ -48,7 +48,7 @@ static float angle;			// 서보모터 각도 (-0.5 ~ 0.5)
 static boolean StartLaneChange = FALSE;
 static int invalid_cnt = 0;
 static int cnt = 0;
-//static boolean NewLane = FALSE;
+static boolean NewLane = FALSE;
 static boolean isRightLane = TRUE;
 
 static boolean RightLaneDetected[30] = { 0, };
@@ -264,64 +264,52 @@ void InfineonRacer_control(void){
 				IR_setMotor0Vol(-0.2);
 			}
 		}
-		/*
+
 		else {
+			// 왼쪽으로 차선변경
 			// 차선이 감지되지 않는 경우를 count
 			if(isRightLane) {
-				if(!NewLane) {
-					IR_setSrvAngle(-0.35);
-				}
 				if(!RightLaneValid) {
 					invalid_cnt++;
 				}
-				// 차선이 감지된 경우
-				// 차선이 감지되지 않은 상황이 충분할 때 (기존차선이 아닌 새로운 차선)
-				// 차선이 감지되는 순간 다시 반대 angle을 주고
-				if(LeftLaneValid || RightLaneValid) {
-					if(invalid_cnt > 15) {
-						if(!NewLane) {
-							cnt = 0;
-							NewLane = TRUE;
-							IR_setSrvAngle(0.6);
-						}
+				// 반대쪽 차선이 감지되는 순간 다시 반대 angle을 주고
+				if(LeftLaneValid && (invalid_cnt > 10)) {
+					if(!NewLane) {
+						cnt = 0;
+						NewLane = TRUE;
+						IR_setSrvAngle(0.6);
 					}
-					// 새로운 차선을 감지(반대 angle을 주고) 일정시간이 지나면 원래 모드로 돌아간다
-					if(NewLane && cnt > 20) {
-						StartLaneChange = FALSE;
-						NewLane = FALSE;
-						ObstacleDetected = FALSE;
-						IR_setSrvAngle(0.125);
-					}
+				}
+				// 일정시간이 지나면 원래 모드로 돌아간다
+				if(NewLane && cnt > 20) {
+					StartLaneChange = FALSE;
+					NewLane = FALSE;
+					ObstacleDetected = FALSE;
+					IR_setSrvAngle(0.125);
 				}
 			}
+			// 오른쪽으로 차선변경
 			else {
-				if(!NewLane) {
-					IR_setSrvAngle(0.6);
-				}
 				if(!LeftLaneValid) {
 					invalid_cnt++;
 				}
-
-				if(LeftLaneValid || RightLaneValid) {
-					if(invalid_cnt > 15) {
-						if(!NewLane) {
-							cnt = 0;
-							NewLane = TRUE;
-							IR_setSrvAngle(-0.35);
-						}
+				if(RightLaneValid && (invalid_cnt > 10)) {
+					if(!NewLane) {
+						cnt = 0;
+						NewLane = TRUE;
+						IR_setSrvAngle(-0.35);
 					}
-
-					if(NewLane && cnt > 20) {
-						StartLaneChange = FALSE;
-						NewLane = FALSE;
-						ObstacleDetected = FALSE;
-						IR_setSrvAngle(0.125);
-					}
+				}
+				if(NewLane && cnt > 20) {
+					StartLaneChange = FALSE;
+					NewLane = FALSE;
+					ObstacleDetected = FALSE;
+					IR_setSrvAngle(0.125);
 				}
 			}
 		}
-		*/
 
+		/*
 		else {
 			//왼쪽으로차선변경
 			if(isRightLane) {
@@ -354,7 +342,7 @@ void InfineonRacer_control(void){
 				}
 			}
 		}
-
+		*/
 	}
 }
 
