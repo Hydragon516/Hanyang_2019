@@ -66,7 +66,8 @@ static boolean EmergencyStop = FALSE;
 
 static boolean ObstacleCount = FALSE;
 
-static boolean SteerLock = FALSE;
+static boolean LeftCameraLock = FALSE;
+static boolean RightCameraLock = FALSE;
 
 /******************************************************************************/
 /*-------------------------Function Implementations---------------------------*/
@@ -217,15 +218,23 @@ void InfineonRacer_control(void){
 	 * angle : -0.35 ~ 0.7 (하드웨어상 0.175가 센터)
 	 */
 	if(!StartLaneChange){
-		if(RightLaneValid) {
+		if(RightLaneValid && !RightCameraLock) {
 			angle = 0.525 * (offset_right / OFFSET_MAX);
 			angle = 0.175 + angle;
 			IR_setSrvAngle(angle);
+			LeftCameraLock = FALSE;
 		}
-		else if(LeftLaneValid) {
+		else if(LeftLaneValid && !LeftCameraLock) {
 			angle = 0.525 * (offset_left / OFFSET_MAX);
 			angle = 0.175 + angle;
 			IR_setSrvAngle(angle);
+			RightCameraLock = FALSE;
+		}
+		if(angle < -0.33 && !isRightLane) {
+			LeftCameraLock = TRUE;
+		}
+		else if(angle > 0.68 && isRightLane) {
+			RightCameraLock = TRUE;
 		}
 		// SpeedControlZone 주행 중 장애물을 만나면
 		// 초기 세팅을 하고 StartLaneChange 모드로 진입한다
@@ -315,15 +324,15 @@ void InfineonRacer_control(void){
 		else {
 			//왼쪽으로차선변경
 			if(isRightLane) {
-				if(cnt > 135) {
+				if(cnt > 140) {
 					IR_setSrvAngle(0);
 					StartLaneChange = FALSE;
 					ObstacleDetected = FALSE;
 				}
-				else if(cnt > 90) {
+				else if(cnt > 95) {
 					IR_setMotor0Vol(-0.2);
 				}
-				else if(cnt > 70) {
+				else if(cnt > 75) {
 					IR_setSrvAngle(0.7);
 					IR_setMotor0Vol(0);
 				}
@@ -345,6 +354,13 @@ void InfineonRacer_control(void){
 			}
 		}
 
+	}
+
+	if(LeftCameraLock || RightCameraLock) {
+		IR_setLed0(TRUE);
+	}
+	else {
+		IR_setLed0(FALSE);
 	}
 }
 

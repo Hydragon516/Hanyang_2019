@@ -73,12 +73,12 @@ void appTaskfu_10ms(void)
 		}
 		AsclinShellInterface_runLineScan();
 
-		if(SpeedControlZone) {
-			IR_setLed0(TRUE);
-		}
-		else {
-			IR_setLed0(FALSE);
-		}
+//		if(SpeedControlZone) {
+//			IR_setLed0(TRUE);
+//		}
+//		else {
+//			IR_setLed0(FALSE);
+//		}
 	}
 
 }
