@@ -44,7 +44,6 @@ void appTaskfu_1ms(void)
 	if(task_cnt_1m == 1000){
 		task_cnt_1m = 0;
 	}
-	InfineonRacer_detectObstacle(task_cnt_1m % 10);
 }
 
 
@@ -61,6 +60,7 @@ void appTaskfu_10ms(void)
 		BasicPort_run();
 		BasicGtmTom_run();
 		BasicVadcBgScan_run();
+		InfineonRacer_detectObstacle((task_cnt_10m / 2) % 5);
 
 		if(IR_Ctrl.basicTest == FALSE){
 			#if CODE == CODE_HAND
@@ -111,9 +111,9 @@ void appTaskfu_100ms(void)
 		i = get_StartLaneChange();
 		i ? printf("TRUE\n") : printf("FALSE\n");
 		printf("\n");
-		*/
 		printf("LeftLaneValid : ");
 		LeftLaneValid ? printf("TRUE\n") : printf("FALSE\n");
+		 */
 	}
 
 

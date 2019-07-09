@@ -48,15 +48,17 @@ static float angle;			// 서보모터 각도 (-0.5 ~ 0.5)
 static boolean StartLaneChange = FALSE;
 static int invalid_cnt = 0;
 static int cnt = 0;
-static boolean NewLane = FALSE;
-static boolean isFullLane = TRUE;
+//static boolean NewLane = FALSE;
+static boolean isRightLane = TRUE;
 
-static boolean LaneDetected[50] = { 0, };
-static int LaneDetectedSum = 0;
+static boolean RightLaneDetected[30] = { 0, };
+static boolean LeftLaneDetected[30] = { 0, };
+static int RightLaneDetectedSum = 0;
+static int LeftLaneDetectedSum = 0;
 
-static float32 AdcResults0[10] = { 0, };
+static float32 AdcResults0[5] = { 0, };
 static float32 AdcResult0Sum = 0;
-static float32 AdcResults1[10] = { 0, };
+static float32 AdcResults1[5] = { 0, };
 static float32 AdcResult1Sum = 0;
 static boolean ObstacleDetected = FALSE;
 
@@ -94,7 +96,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	int sum_right = 0;		// WIDTH 수만큼의 LineScan.adc 구간합
 	int sum_left = 0;
 	int sums_right[128];
-	int sums_left[128];
+//	int sums_left[128];
 	int min_sum_right;		// 최소 구간합
 	int min_sum_left;
 	int max_sum_right;		// 최대 구간합
@@ -130,7 +132,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	for(i = WIDTH + 20; i < 120; i++) {
 		sum_left += IR_LineScan.adcResult[1][i];
 		sum_left -= IR_LineScan.adcResult[1][i - WIDTH];
-		sums_left[i] = sum_left;
+//		sums_left[i] = sum_left;
 
 		if(sum_left < min_sum_left) {
 			min_sum_left = sum_left;
@@ -157,7 +159,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	}
 
 	// 점선 실선 구분
-	InfineonRacer_DotFullLane((task_cnt_10m / 2) % 50);
+	InfineonRacer_DotFullLane((task_cnt_10m / 2) % 30);
 
 	/*	Speed Control Zone 계산
 	 *  valid한 다른 구간이 더 존재하는 지 검사
@@ -233,7 +235,7 @@ void InfineonRacer_control(void){
 				cnt = 0;
 				IR_setMotor0Vol(0);
 				// 차선변경하는 방향으로 angle을 최대한 꺾어준다
-				if(isFullLane) {
+				if(isRightLane) {
 					IR_setSrvAngle(-0.35);
 				}
 				else {
@@ -265,7 +267,7 @@ void InfineonRacer_control(void){
 		/*
 		else {
 			// 차선이 감지되지 않는 경우를 count
-			if(isFullLane) {
+			if(isRightLane) {
 				if(!NewLane) {
 					IR_setSrvAngle(-0.35);
 				}
@@ -275,8 +277,8 @@ void InfineonRacer_control(void){
 				// 차선이 감지된 경우
 				// 차선이 감지되지 않은 상황이 충분할 때 (기존차선이 아닌 새로운 차선)
 				// 차선이 감지되는 순간 다시 반대 angle을 주고
-				else {
-					if(invalid_cnt > 10) {
+				if(LeftLaneValid || RightLaneValid) {
+					if(invalid_cnt > 15) {
 						if(!NewLane) {
 							cnt = 0;
 							NewLane = TRUE;
@@ -300,8 +302,8 @@ void InfineonRacer_control(void){
 					invalid_cnt++;
 				}
 
-				else {
-					if(invalid_cnt > 10) {
+				if(LeftLaneValid || RightLaneValid) {
+					if(invalid_cnt > 15) {
 						if(!NewLane) {
 							cnt = 0;
 							NewLane = TRUE;
@@ -321,8 +323,8 @@ void InfineonRacer_control(void){
 		*/
 
 		else {
-			//왼쪽차선변경
-			if(isFullLane) {
+			//왼쪽으로차선변경
+			if(isRightLane) {
 				if(cnt > 135) {
 					IR_setSrvAngle(0);
 					StartLaneChange = FALSE;
@@ -336,7 +338,7 @@ void InfineonRacer_control(void){
 					IR_setMotor0Vol(0);
 				}
 			}
-			//오른쪽차선변경
+			//오른쪽으로차선변경
 			else {
 				if(cnt > 145) {
 					IR_setSrvAngle(0);
@@ -361,17 +363,24 @@ void InfineonRacer_control(void){
  */
 void InfineonRacer_DotFullLane(sint32 task_cnt) {
 	if(!StartLaneChange) {
-		LaneDetectedSum -= LaneDetected[task_cnt];
-		LaneDetected[task_cnt] = RightLaneValid;
-		LaneDetectedSum += LaneDetected[task_cnt];
+		RightLaneDetectedSum -= RightLaneDetected[task_cnt];
+		RightLaneDetected[task_cnt] = RightLaneValid;
+		RightLaneDetectedSum += RightLaneDetected[task_cnt];
 
-		// LaneDetectedSum : 0 ~ 50
-		// 90% 이상 감지를 실선으로 간주
-		if(LaneDetectedSum > 40) {
-			isFullLane = TRUE;
+		LeftLaneDetectedSum -= LeftLaneDetected[task_cnt];
+		LeftLaneDetected[task_cnt] = LeftLaneValid;
+		LeftLaneDetectedSum += LeftLaneDetected[task_cnt];
+		// RightLaneDetectedSum : 0 ~ 30
+		// 약 85% 이상 감지를 실선으로 간주
+		if(RightLaneDetectedSum > 25) {
+			isRightLane = TRUE;
 		}
+		else if(LeftLaneDetectedSum > 25){
+			isRightLane = FALSE;
+		}
+		// 양쪽다 잡히지 않으면 isRightLane 유지
 		else {
-			isFullLane = FALSE;
+			;
 		}
 	}
 }
@@ -388,13 +397,15 @@ void InfineonRacer_detectObstacle(sint32 task_cnt) {
 	AdcResult1Sum += AdcResult1;
 	AdcResults1[task_cnt] = AdcResult1;
 
-	if(AdcResult0Sum > 5.4) {
+	if(AdcResult0Sum > 2.7) {
 		ObstacleDetected = TRUE;
 	}
 
-	if(!SpeedControlZone && AdcResult1Sum > 2.0) {
+	if(!SpeedControlZone && AdcResult1Sum > 1.0) {
 		EmergencyStop = TRUE;
 	}
+
+		printf("Adc0 : %f\n", AdcResult0Sum);
 }
 
 boolean get_StartLaneChange(void) {
