@@ -51,8 +51,8 @@ static int cnt = 0;
 static boolean NewLane = FALSE;
 static boolean isRightLane = TRUE;
 
-static boolean RightLaneDetected[30] = { 0, };
-static boolean LeftLaneDetected[30] = { 0, };
+static boolean RightLaneDetected[40] = { 0, };
+static boolean LeftLaneDetected[40] = { 0, };
 static int RightLaneDetectedSum = 0;
 static int LeftLaneDetectedSum = 0;
 
@@ -159,7 +159,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 	}
 
 	// 점선 실선 구분
-	InfineonRacer_DotFullLane((task_cnt_10m / 2) % 30);
+	InfineonRacer_DotFullLane((task_cnt_10m / 2) % 40);
 
 	/*	Speed Control Zone 계산
 	 *  valid한 다른 구간이 더 존재하는 지 검사
@@ -346,7 +346,7 @@ void InfineonRacer_control(void){
 	}
 }
 
-/* 점선 실선을 구분해서 isFullLane에 저장
+/* 점선 실선을 구분해서 isRightLane에 저장
  * 일정 시간동안 LaneDetected 비율이 기준 이상이면 실선
  */
 void InfineonRacer_DotFullLane(sint32 task_cnt) {
@@ -358,12 +358,12 @@ void InfineonRacer_DotFullLane(sint32 task_cnt) {
 		LeftLaneDetectedSum -= LeftLaneDetected[task_cnt];
 		LeftLaneDetected[task_cnt] = LeftLaneValid;
 		LeftLaneDetectedSum += LeftLaneDetected[task_cnt];
-		// RightLaneDetectedSum : 0 ~ 30
-		// 약 85% 이상 감지를 실선으로 간주
-		if(RightLaneDetectedSum > 25) {
+		// RightLaneDetectedSum : 0 ~ 40
+		// 약 90% 이상 감지를 실선으로 간주
+		if(RightLaneDetectedSum > 35) {
 			isRightLane = TRUE;
 		}
-		else if(LeftLaneDetectedSum > 25){
+		else if(LeftLaneDetectedSum > 35){
 			isRightLane = FALSE;
 		}
 		// 양쪽다 잡히지 않으면 isRightLane 유지
