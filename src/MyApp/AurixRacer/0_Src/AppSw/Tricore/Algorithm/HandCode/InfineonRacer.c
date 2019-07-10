@@ -7,7 +7,7 @@
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
-#define WIDTH (7)
+#define WIDTH (6)
 #define STANDARD_RIGHT (64)
 #define STANDARD_LEFT (70)
 #define OFFSET_MAX (25)
@@ -66,8 +66,8 @@ static boolean EmergencyStop = FALSE;
 
 static boolean ObstacleCount = FALSE;
 
-static boolean LeftCameraLock = FALSE;
-static boolean RightCameraLock = FALSE;
+//static boolean LeftCameraLock = FALSE;
+//static boolean RightCameraLock = FALSE;
 
 /******************************************************************************/
 /*-------------------------Function Implementations---------------------------*/
@@ -132,7 +132,7 @@ void InfineonRacer_detectLane(sint32 task_cnt_10m){
 			max_sum_right = sum_right;
 		}
 	}
-	for(i = WIDTH + 20; i < 120; i++) {
+	for(i = WIDTH + 20; i < 115; i++) {
 		sum_left += IR_LineScan.adcResult[1][i];
 		sum_left -= IR_LineScan.adcResult[1][i - WIDTH];
 //		sums_left[i] = sum_left;
@@ -218,6 +218,7 @@ void InfineonRacer_control(void){
 	 * angle : -0.35 ~ 0.7 (하드웨어상 0.175가 센터)
 	 */
 	if(!StartLaneChange){
+		/*
 		if(RightLaneValid && !RightCameraLock) {
 			angle = 0.525 * (offset_right / OFFSET_MAX);
 			angle = 0.175 + angle;
@@ -236,6 +237,18 @@ void InfineonRacer_control(void){
 		else if(angle > 0.68 && isRightLane) {
 			RightCameraLock = TRUE;
 		}
+		*/
+		if(RightLaneValid) {
+			angle = 0.525 * (offset_right / OFFSET_MAX);
+			angle = 0.175 + angle;
+			IR_setSrvAngle(angle);
+		}
+		else if(LeftLaneValid) {
+			angle = 0.525 * (offset_left / OFFSET_MAX);
+			angle = 0.175 + angle;
+			IR_setSrvAngle(angle);
+		}
+
 		// SpeedControlZone 주행 중 장애물을 만나면
 		// 초기 세팅을 하고 StartLaneChange 모드로 진입한다
 		if(SpeedControlZone) {
@@ -324,30 +337,30 @@ void InfineonRacer_control(void){
 		else {
 			//왼쪽으로차선변경
 			if(isRightLane) {
-				if(cnt > 140) {
+				if(cnt > 122) {
 					IR_setSrvAngle(0);
 					StartLaneChange = FALSE;
 					ObstacleDetected = FALSE;
 				}
-				else if(cnt > 95) {
+				else if(cnt > 87) {
 					IR_setMotor0Vol(-0.2);
 				}
-				else if(cnt > 75) {
+				else if(cnt > 67) {
 					IR_setSrvAngle(0.7);
 					IR_setMotor0Vol(0);
 				}
 			}
 			//오른쪽으로차선변경
 			else {
-				if(cnt > 145) {
+				if(cnt > 115) {
 					IR_setSrvAngle(0);
 					StartLaneChange = FALSE;
 					ObstacleDetected = FALSE;
 				}
-				else if(cnt > 105) {
+				else if(cnt > 90) {
 					IR_setMotor0Vol(-0.2);
 				}
-				else if(cnt > 85) {
+				else if(cnt > 70) {
 					IR_setSrvAngle(-0.35);
 					IR_setMotor0Vol(0);
 				}
@@ -356,7 +369,7 @@ void InfineonRacer_control(void){
 
 	}
 
-	if(LeftCameraLock || RightCameraLock) {
+	if(SpeedControlZone) {
 		IR_setLed0(TRUE);
 	}
 	else {
