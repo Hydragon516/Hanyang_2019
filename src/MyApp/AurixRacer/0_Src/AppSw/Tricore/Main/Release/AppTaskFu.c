@@ -73,12 +73,12 @@ void appTaskfu_10ms(void)
 		}
 		AsclinShellInterface_runLineScan();
 
-//		if(SpeedControlZone) {
-//			IR_setLed0(TRUE);
-//		}
-//		else {
-//			IR_setLed0(FALSE);
-//		}
+		if(SpeedControlZone) {
+			IR_setLed0(TRUE);
+		}
+		else {
+			IR_setLed0(FALSE);
+		}
 	}
 
 }
@@ -98,25 +98,6 @@ void appTaskfu_100ms(void)
 
 #endif
 
-
-	if(task_cnt_100m % 2 == 0) {
-		int i;
-		/*
-		printf("SpeedControlZone : ");
-		SpeedControlZone ? printf("TRUE\n") : printf("FALSE\n");
-		printf("ObstacleCount : ");
-		i = get_ObstacleCount();
-		i ? printf("TRUE\n") : printf("FALSE\n");
-		printf("StartLaneChange : ");
-		i = get_StartLaneChange();
-		i ? printf("TRUE\n") : printf("FALSE\n");
-		printf("\n");
-		printf("LeftLaneValid : ");
-		LeftLaneValid ? printf("TRUE\n") : printf("FALSE\n");
-		 */
-	}
-
-
 }
 
 void appTaskfu_1000ms(void)
@@ -125,9 +106,6 @@ void appTaskfu_1000ms(void)
 	if(task_cnt_1000m == 1000){
 		task_cnt_1000m = 0;
 	}
-	//printf("Led0 : %d\n", IR_Port.led0);
-	//printf("Adc[3] : %f\n", IR_AdcResult[3]);
-    //printf("Adc[3] : %f\n", IR_AdcResult[3]);
 }
 
 void appTaskfu_1ms_trial(void)
